@@ -39,6 +39,10 @@ tasks.register('runPlugin', JavaExec) {
 	description = 'Run RuneLite with the plugin loaded'
 	classpath = sourceSets.test.runtimeClasspath
 	mainClass = 'com.bookofthedeadnotifier.PluginLauncher'
-	jvmArgs = ['-ea', '--add-opens=java.desktop/com.apple.eawt=ALL-UNNAMED', '--add-opens=java.desktop/sun.awt=ALL-UNNAMED']
+	jvmArgs = [
+		'-ea',
+		'--add-opens=java.desktop/com.apple.eawt=ALL-UNNAMED',
+		'--add-opens=java.desktop/sun.awt=ALL-UNNAMED'
+	]
 	args = ['--developer-mode']
 }
