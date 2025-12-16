@@ -76,8 +76,11 @@ public class BookOfTheDeadNotifierPlugin extends Plugin
     @Subscribe
     public void onVarbitChanged(VarbitChanged event)
     {
-        // Check spellbook changes
-        checkConditions();
+        if (event.getVarbitId() == Varbits.SPELLBOOK)
+        {
+            checkSpellbook();
+            evaluateWarningState();
+        }
     }
 
     @Subscribe
@@ -86,7 +89,9 @@ public class BookOfTheDeadNotifierPlugin extends Plugin
         boolean isRelevantContainer = isInventoryOrEquipment(event.getContainerId());
         if (isRelevantContainer)
         {
-            checkConditions();
+            checkThrallRunes();
+            checkBookOfTheDead();
+            evaluateWarningState();
         }
     }
 
@@ -96,10 +101,8 @@ public class BookOfTheDeadNotifierPlugin extends Plugin
             || containerId == InventoryID.EQUIPMENT.getId();
     }
 
-    private void checkConditions()
+    private void evaluateWarningState()
     {
-        updateAllConditions();
-
         int conditionsMet = countConditionsMet();
         boolean shouldWarn = conditionsMet == 2;
 
@@ -111,13 +114,6 @@ public class BookOfTheDeadNotifierPlugin extends Plugin
         {
             hideWarning();
         }
-    }
-
-    private void updateAllConditions()
-    {
-        checkSpellbook();
-        checkThrallRunes();
-        checkBookOfTheDead();
     }
 
     private int countConditionsMet()
