@@ -79,8 +79,30 @@ public class BookOfTheDeadNotifierPlugin extends Plugin
         if (event.getVarbitId() == Varbits.SPELLBOOK)
         {
             checkSpellbook();
+            checkThrallRunes();
             evaluateWarningState();
         }
+        else if (isRunePouchVarbit(event.getVarbitId()))
+        {
+            checkThrallRunes();
+            evaluateWarningState();
+        }
+    }
+
+    private boolean isRunePouchVarbit(int varbitId)
+    {
+        return varbitId == Varbits.RUNE_POUCH_RUNE1
+            || varbitId == Varbits.RUNE_POUCH_RUNE2
+            || varbitId == Varbits.RUNE_POUCH_RUNE3
+            || varbitId == Varbits.RUNE_POUCH_RUNE4
+            || varbitId == Varbits.RUNE_POUCH_RUNE5
+            || varbitId == Varbits.RUNE_POUCH_RUNE6
+            || varbitId == Varbits.RUNE_POUCH_AMOUNT1
+            || varbitId == Varbits.RUNE_POUCH_AMOUNT2
+            || varbitId == Varbits.RUNE_POUCH_AMOUNT3
+            || varbitId == Varbits.RUNE_POUCH_AMOUNT4
+            || varbitId == Varbits.RUNE_POUCH_AMOUNT5
+            || varbitId == Varbits.RUNE_POUCH_AMOUNT6;
     }
 
     @Subscribe
@@ -263,17 +285,29 @@ public class BookOfTheDeadNotifierPlugin extends Plugin
 
     private int countRunesInPouchSlot(int slot, RuneChecker checker)
     {
-        int runeId = getRunePouchRuneId(slot);
+        int runeEnumId = getRunePouchRuneEnumId(slot);
         int amount = getRunePouchAmount(slot);
 
-        if (amount > 0 && checker.matches(runeId))
+        if (runeEnumId == 0 || amount <= 0)
+        {
+            return 0;
+        }
+
+        int itemId = convertRuneEnumIdToItemId(runeEnumId);
+        if (checker.matches(itemId))
         {
             return amount;
         }
         return 0;
     }
 
-    private int getRunePouchRuneId(int slot)
+    private int convertRuneEnumIdToItemId(int runeEnumId)
+    {
+        EnumComposition runepouchEnum = client.getEnum(EnumID.RUNEPOUCH_RUNE);
+        return runepouchEnum.getIntValue(runeEnumId);
+    }
+
+    private int getRunePouchRuneEnumId(int slot)
     {
         switch (slot)
         {
