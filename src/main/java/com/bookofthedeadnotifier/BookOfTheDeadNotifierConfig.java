@@ -41,9 +41,53 @@ public interface BookOfTheDeadNotifierConfig extends Config
     }
 
     @ConfigSection(
+        name = "Notification Conditions",
+        description = "Choose which conditions trigger a reminder",
+        position = 3,
+        closedByDefault = true
+    )
+    String notificationConditionsSection = "notificationConditions";
+
+    @ConfigItem(
+        keyName = "notifyOnMissingBook",
+        name = "Notify on Missing Book",
+        description = "Show reminder when Book of the Dead is missing",
+        position = 0,
+        section = notificationConditionsSection
+    )
+    default boolean notifyOnMissingBook()
+    {
+        return true;
+    }
+
+    @ConfigItem(
+        keyName = "notifyOnMissingRunes",
+        name = "Notify on Missing Runes",
+        description = "Show reminder when thrall runes are missing",
+        position = 1,
+        section = notificationConditionsSection
+    )
+    default boolean notifyOnMissingRunes()
+    {
+        return true;
+    }
+
+    @ConfigItem(
+        keyName = "notifyOnWrongSpellbook",
+        name = "Notify on Wrong Spellbook",
+        description = "Show reminder when not on Arceuus spellbook",
+        position = 2,
+        section = notificationConditionsSection
+    )
+    default boolean notifyOnWrongSpellbook()
+    {
+        return true;
+    }
+
+    @ConfigSection(
         name = "Rune Thresholds",
         description = "Minimum rune quantities required",
-        position = 3,
+        position = 4,
         closedByDefault = true
     )
     String runeThresholdSection = "runeThresholds";
@@ -87,7 +131,7 @@ public interface BookOfTheDeadNotifierConfig extends Config
     @ConfigSection(
         name = "Display Options",
         description = "Customize the appearance of warnings",
-        position = 4
+        position = 5
     )
     String displaySection = "displayOptions";
 

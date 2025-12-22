@@ -128,12 +128,34 @@ public class BookOfTheDeadNotifierPlugin extends Plugin
     private void handleWarningState()
     {
         MissingCondition missingCondition = determineMissingCondition();
+        
+        if (!isConditionNotificationEnabled(missingCondition))
+        {
+            hideWarning();
+            return;
+        }
+        
         boolean conditionChanged = missingCondition != currentMissingCondition;
 
         if (conditionChanged)
         {
             currentMissingCondition = missingCondition;
             showWarning();
+        }
+    }
+
+    private boolean isConditionNotificationEnabled(MissingCondition condition)
+    {
+        switch (condition)
+        {
+            case BOOK_OF_THE_DEAD:
+                return config.notifyOnMissingBook();
+            case THRALL_RUNES:
+                return config.notifyOnMissingRunes();
+            case ARCEUUS_SPELLBOOK:
+                return config.notifyOnWrongSpellbook();
+            default:
+                return false;
         }
     }
 
