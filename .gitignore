@@ -1,11 +1,12 @@
 .gradle
-build
 .idea/
-bin/
 .project
 .settings/
+.scripts/
 .classpath
 .factorypath
+build
+bin/
 nbactions.xml
 nb-configuration.xml
 nbproject/
