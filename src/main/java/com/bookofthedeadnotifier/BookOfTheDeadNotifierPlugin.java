@@ -111,6 +111,7 @@ public class BookOfTheDeadNotifierPlugin extends Plugin
         boolean isRelevantContainer = isInventoryOrEquipment(event.getContainerId());
         if (isRelevantContainer)
         {
+            checkSpellbook();
             checkThrallRunes();
             checkBookOfTheDead();
             evaluateWarningState();
