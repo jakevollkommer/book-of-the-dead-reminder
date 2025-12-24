@@ -276,12 +276,25 @@ public class BookOfTheDeadNotifierPlugin extends Plugin
 
     private int countRunesInRunePouch(RuneChecker checker)
     {
+        if (!hasRunePouch())
+        {
+            return 0;
+        }
+
         int count = 0;
         for (int slot = 1; slot <= 6; slot++)
         {
             count += countRunesInPouchSlot(slot, checker);
         }
         return count;
+    }
+
+    private boolean hasRunePouch()
+    {
+        return hasItemInEquipmentOrInventory(ItemID.RUNE_POUCH)
+            || hasItemInEquipmentOrInventory(ItemID.RUNE_POUCH_L)
+            || hasItemInEquipmentOrInventory(ItemID.DIVINE_RUNE_POUCH)
+            || hasItemInEquipmentOrInventory(ItemID.DIVINE_RUNE_POUCH_L);
     }
 
     private int countRunesInPouchSlot(int slot, RuneChecker checker)
