@@ -2,9 +2,19 @@ package com.bookofthedeadnotifier;
 
 import com.google.inject.Provides;
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.api.*;
-import net.runelite.api.events.VarbitChanged;
+import net.runelite.api.Client;
+import net.runelite.api.EnumComposition;
+import net.runelite.api.EnumID;
+import net.runelite.api.EquipmentInventorySlot;
+import net.runelite.api.GameState;
+import net.runelite.api.InventoryID;
+import net.runelite.api.Item;
+import net.runelite.api.ItemContainer;
+import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.ItemContainerChanged;
+import net.runelite.api.events.VarbitChanged;
+import net.runelite.api.gameval.ItemID;
+import net.runelite.api.gameval.VarbitID;
 import net.runelite.client.Notifier;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
@@ -24,6 +34,24 @@ import javax.inject.Inject;
 )
 public class BookOfTheDeadNotifierPlugin extends Plugin
 {
+    private static final int ARCEUUS_SPELLBOOK = 3;
+    private static final int[] RUNE_POUCH_RUNE_VARBITS = {
+        VarbitID.RUNE_POUCH_TYPE_1,
+        VarbitID.RUNE_POUCH_TYPE_2,
+        VarbitID.RUNE_POUCH_TYPE_3,
+        VarbitID.RUNE_POUCH_TYPE_4,
+        VarbitID.RUNE_POUCH_TYPE_5,
+        VarbitID.RUNE_POUCH_TYPE_6
+    };
+    private static final int[] RUNE_POUCH_AMOUNT_VARBITS = {
+        VarbitID.RUNE_POUCH_QUANTITY_1,
+        VarbitID.RUNE_POUCH_QUANTITY_2,
+        VarbitID.RUNE_POUCH_QUANTITY_3,
+        VarbitID.RUNE_POUCH_QUANTITY_4,
+        VarbitID.RUNE_POUCH_QUANTITY_5,
+        VarbitID.RUNE_POUCH_QUANTITY_6
+    };
+
     @Inject
     private Client client;
 
@@ -62,6 +90,7 @@ public class BookOfTheDeadNotifierPlugin extends Plugin
     {
         overlayManager.add(overlay);
         keyManager.registerKeyListener(hotkeyListener);
+        refreshPlayerState();
         log.info("Book of the Dead Reminder started!");
     }
 
@@ -76,46 +105,57 @@ public class BookOfTheDeadNotifierPlugin extends Plugin
     @Subscribe
     public void onVarbitChanged(VarbitChanged event)
     {
-        if (event.getVarbitId() == Varbits.SPELLBOOK)
+        if (event.getVarbitId() == VarbitID.SPELLBOOK || isRunePouchVarbit(event.getVarbitId()))
         {
-            checkSpellbook();
-            checkThrallRunes();
-            evaluateWarningState();
+            refreshPlayerState();
         }
-        else if (isRunePouchVarbit(event.getVarbitId()))
+    }
+
+    @Subscribe
+    public void onGameStateChanged(GameStateChanged event)
+    {
+        if (event.getGameState() == GameState.LOGGED_IN)
         {
-            checkThrallRunes();
-            evaluateWarningState();
+            refreshPlayerState();
         }
     }
 
     private boolean isRunePouchVarbit(int varbitId)
     {
-        return varbitId == Varbits.RUNE_POUCH_RUNE1
-            || varbitId == Varbits.RUNE_POUCH_RUNE2
-            || varbitId == Varbits.RUNE_POUCH_RUNE3
-            || varbitId == Varbits.RUNE_POUCH_RUNE4
-            || varbitId == Varbits.RUNE_POUCH_RUNE5
-            || varbitId == Varbits.RUNE_POUCH_RUNE6
-            || varbitId == Varbits.RUNE_POUCH_AMOUNT1
-            || varbitId == Varbits.RUNE_POUCH_AMOUNT2
-            || varbitId == Varbits.RUNE_POUCH_AMOUNT3
-            || varbitId == Varbits.RUNE_POUCH_AMOUNT4
-            || varbitId == Varbits.RUNE_POUCH_AMOUNT5
-            || varbitId == Varbits.RUNE_POUCH_AMOUNT6;
+        for (int runeVarbit : RUNE_POUCH_RUNE_VARBITS)
+        {
+            if (varbitId == runeVarbit)
+            {
+                return true;
+            }
+        }
+
+        for (int amountVarbit : RUNE_POUCH_AMOUNT_VARBITS)
+        {
+            if (varbitId == amountVarbit)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     @Subscribe
     public void onItemContainerChanged(ItemContainerChanged event)
     {
-        boolean isRelevantContainer = isInventoryOrEquipment(event.getContainerId());
-        if (isRelevantContainer)
+        if (isInventoryOrEquipment(event.getContainerId()))
         {
-            checkSpellbook();
-            checkThrallRunes();
-            checkBookOfTheDead();
-            evaluateWarningState();
+            refreshPlayerState();
         }
+    }
+
+    private void refreshPlayerState()
+    {
+        checkSpellbook();
+        checkThrallRunes();
+        checkBookOfTheDead();
+        evaluateWarningState();
     }
 
     private boolean isInventoryOrEquipment(int containerId)
@@ -209,8 +249,8 @@ public class BookOfTheDeadNotifierPlugin extends Plugin
 
     private void checkSpellbook()
     {
-        int spellbookVarbit = client.getVarbitValue(Varbits.SPELLBOOK);
-        hasArceuusSpellbook = (spellbookVarbit == 3); // 3 = Arceuus spellbook
+        int spellbookVarbit = client.getVarbitValue(VarbitID.SPELLBOOK);
+        hasArceuusSpellbook = spellbookVarbit == ARCEUUS_SPELLBOOK;
     }
 
     private void checkThrallRunes()
@@ -291,10 +331,10 @@ public class BookOfTheDeadNotifierPlugin extends Plugin
 
     private boolean hasRunePouch()
     {
-        return hasItemInEquipmentOrInventory(ItemID.RUNE_POUCH)
-            || hasItemInEquipmentOrInventory(ItemID.RUNE_POUCH_L)
+        return hasItemInEquipmentOrInventory(ItemID.BH_RUNE_POUCH)
+            || hasItemInEquipmentOrInventory(ItemID.BH_RUNE_POUCH_TROUVER)
             || hasItemInEquipmentOrInventory(ItemID.DIVINE_RUNE_POUCH)
-            || hasItemInEquipmentOrInventory(ItemID.DIVINE_RUNE_POUCH_L);
+            || hasItemInEquipmentOrInventory(ItemID.DIVINE_RUNE_POUCH_TROUVER);
     }
 
     private int countRunesInPouchSlot(int slot, RuneChecker checker)
@@ -323,40 +363,33 @@ public class BookOfTheDeadNotifierPlugin extends Plugin
 
     private int getRunePouchRuneEnumId(int slot)
     {
-        switch (slot)
+        if (slot < 1 || slot > RUNE_POUCH_RUNE_VARBITS.length)
         {
-            case 1: return client.getVarbitValue(Varbits.RUNE_POUCH_RUNE1);
-            case 2: return client.getVarbitValue(Varbits.RUNE_POUCH_RUNE2);
-            case 3: return client.getVarbitValue(Varbits.RUNE_POUCH_RUNE3);
-            case 4: return client.getVarbitValue(Varbits.RUNE_POUCH_RUNE4);
-            case 5: return client.getVarbitValue(Varbits.RUNE_POUCH_RUNE5);
-            case 6: return client.getVarbitValue(Varbits.RUNE_POUCH_RUNE6);
-            default: return 0;
+            return 0;
         }
+
+        return client.getVarbitValue(RUNE_POUCH_RUNE_VARBITS[slot - 1]);
     }
 
     private int getRunePouchAmount(int slot)
     {
-        switch (slot)
+        if (slot < 1 || slot > RUNE_POUCH_AMOUNT_VARBITS.length)
         {
-            case 1: return client.getVarbitValue(Varbits.RUNE_POUCH_AMOUNT1);
-            case 2: return client.getVarbitValue(Varbits.RUNE_POUCH_AMOUNT2);
-            case 3: return client.getVarbitValue(Varbits.RUNE_POUCH_AMOUNT3);
-            case 4: return client.getVarbitValue(Varbits.RUNE_POUCH_AMOUNT4);
-            case 5: return client.getVarbitValue(Varbits.RUNE_POUCH_AMOUNT5);
-            case 6: return client.getVarbitValue(Varbits.RUNE_POUCH_AMOUNT6);
-            default: return 0;
+            return 0;
         }
+
+        return client.getVarbitValue(RUNE_POUCH_AMOUNT_VARBITS[slot - 1]);
     }
 
     private boolean isFireRune(int itemId)
     {
         switch (itemId)
         {
-            case ItemID.FIRE_RUNE:
-            case ItemID.LAVA_RUNE:
-            case ItemID.SMOKE_RUNE:
-            case ItemID.STEAM_RUNE:
+            case ItemID.FIRERUNE:
+            case ItemID.LAVARUNE:
+            case ItemID.SMOKERUNE:
+            case ItemID.STEAMRUNE:
+            case ItemID.SUNFIRERUNE:
                 return true;
             default:
                 return false;
@@ -365,15 +398,15 @@ public class BookOfTheDeadNotifierPlugin extends Plugin
 
     private boolean isBloodRune(int itemId)
     {
-        return itemId == ItemID.BLOOD_RUNE;
+        return itemId == ItemID.BLOODRUNE;
     }
 
     private boolean isCosmicRune(int itemId)
     {
         switch (itemId)
         {
-            case ItemID.COSMIC_RUNE:
-            case ItemID.AETHER_RUNE:
+            case ItemID.COSMICRUNE:
+            case ItemID.AETHERRUNE:
                 return true;
             default:
                 return false;
@@ -388,16 +421,22 @@ public class BookOfTheDeadNotifierPlugin extends Plugin
 
     private boolean hasEquippedFireStaff()
     {
-        Item weapon = getEquippedWeapon();
-        if (weapon == null)
+        return hasInfiniteFireSourceEquipped(EquipmentInventorySlot.WEAPON)
+            || hasInfiniteFireSourceEquipped(EquipmentInventorySlot.SHIELD);
+    }
+
+    private boolean hasInfiniteFireSourceEquipped(EquipmentInventorySlot slot)
+    {
+        Item item = getEquippedItem(slot);
+        if (item == null)
         {
             return false;
         }
 
-        return isFireStaff(weapon.getId());
+        return isFireStaff(item.getId());
     }
 
-    private Item getEquippedWeapon()
+    private Item getEquippedItem(EquipmentInventorySlot slot)
     {
         ItemContainer equipment = client.getItemContainer(InventoryID.EQUIPMENT);
         if (equipment == null)
@@ -405,7 +444,7 @@ public class BookOfTheDeadNotifierPlugin extends Plugin
             return null;
         }
 
-        return equipment.getItem(EquipmentInventorySlot.WEAPON.getSlotIdx());
+        return equipment.getItem(slot.getSlotIdx());
     }
 
     private boolean isFireStaff(int itemId)
@@ -417,11 +456,16 @@ public class BookOfTheDeadNotifierPlugin extends Plugin
             case ItemID.MYSTIC_FIRE_STAFF:
             case ItemID.LAVA_BATTLESTAFF:
             case ItemID.MYSTIC_LAVA_STAFF:
+            case ItemID.LAVA_BATTLESTAFF_PRETTY:
+            case ItemID.MYSTIC_LAVA_STAFF_PRETTY:
             case ItemID.STEAM_BATTLESTAFF:
-            case ItemID.MYSTIC_STEAM_STAFF:
+            case ItemID.MYSTIC_STEAM_BATTLESTAFF:
+            case ItemID.STEAM_BATTLESTAFF_PRETTY:
+            case ItemID.MYSTIC_STEAM_BATTLESTAFF_PRETTY:
             case ItemID.SMOKE_BATTLESTAFF:
-            case ItemID.MYSTIC_SMOKE_STAFF:
+            case ItemID.MYSTIC_SMOKE_BATTLESTAFF:
             case ItemID.TOME_OF_FIRE:
+            case ItemID.BR_TOME_OF_FIRE:
             case ItemID.TWINFLAME_STAFF:
                 return true;
             default:
