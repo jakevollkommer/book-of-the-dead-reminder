@@ -15,6 +15,7 @@ import net.runelite.api.events.ItemContainerChanged;
 import net.runelite.api.events.VarbitChanged;
 import net.runelite.api.gameval.ItemID;
 import net.runelite.api.gameval.VarbitID;
+import net.runelite.client.callback.ClientThread;
 import net.runelite.client.Notifier;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
@@ -70,6 +71,9 @@ public class BookOfTheDeadNotifierPlugin extends Plugin
     @Inject
     private KeyManager keyManager;
 
+    @Inject
+    private ClientThread clientThread;
+
     private boolean hasArceuusSpellbook = false;
     private boolean hasSufficientThrallRunes = false;
     private boolean hasBookOfTheDead = false;
@@ -90,7 +94,7 @@ public class BookOfTheDeadNotifierPlugin extends Plugin
     {
         overlayManager.add(overlay);
         keyManager.registerKeyListener(hotkeyListener);
-        refreshPlayerState();
+        clientThread.invokeLater(this::refreshPlayerState);
         log.info("Book of the Dead Reminder started!");
     }
 
