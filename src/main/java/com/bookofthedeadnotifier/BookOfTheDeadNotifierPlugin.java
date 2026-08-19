@@ -34,13 +34,10 @@ import net.runelite.client.events.ConfigChanged;
 @PluginDescriptor(
     name = "Book of the Dead Reminder",
     description = "Reminds you when you seem to be missing a thrall requirement (Book of the Dead, Arceuus spellbook, Thrall runes)",
-    tags = {"arceuus", "thrall", "thralls", "book of the dead", "spell", "reminder", "spellbook"}
+    tags = {"jake", "arceuus", "thrall", "thralls", "book of the dead", "spell", "spellbook", "reminder", "necromancy", "resurrect", "ghost", "skeleton", "zombie", "rune", "runes"}
 )
 public class BookOfTheDeadNotifierPlugin extends Plugin
 {
-    @Inject
-    private ConfigManager configManager;
-
     private static final int ARCEUUS_SPELLBOOK = 3;
     private static final int[] RUNE_POUCH_RUNE_VARBITS = {
         VarbitID.RUNE_POUCH_TYPE_1,
@@ -584,20 +581,19 @@ public class BookOfTheDeadNotifierPlugin extends Plugin
     }
 
     // The config panel cannot host real buttons, so "Buy me a coffee" is a checkbox that
-    // opens the Ko-fi page when ticked and immediately unticks itself.
+    // acts as a button: any click of the box, tick or untick, opens the Ko-fi page.
     @Subscribe
     public void onSupportButtonPressed(ConfigChanged event)
     {
-        boolean isSupportButtonTick = "bookofthedeadreminder".equals(event.getGroup())
+        boolean isSupportButtonClick = "bookofthedeadreminder".equals(event.getGroup())
             && "supportButton".equals(event.getKey())
-            && Boolean.parseBoolean(event.getNewValue());
-        if (!isSupportButtonTick)
+            && event.getNewValue() != null;
+        if (!isSupportButtonClick)
         {
             return;
         }
 
         LinkBrowser.browse("https://ko-fi.com/jakevollkommer");
-        configManager.setConfiguration("bookofthedeadreminder", "supportButton", false);
     }
 
     @Provides
