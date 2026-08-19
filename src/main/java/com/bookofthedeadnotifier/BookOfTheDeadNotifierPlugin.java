@@ -27,6 +27,8 @@ import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.HotkeyListener;
 
 import javax.inject.Inject;
+import net.runelite.client.util.LinkBrowser;
+import net.runelite.client.events.ConfigChanged;
 
 @Slf4j
 @PluginDescriptor(
@@ -36,6 +38,9 @@ import javax.inject.Inject;
 )
 public class BookOfTheDeadNotifierPlugin extends Plugin
 {
+    @Inject
+    private ConfigManager configManager;
+
     private static final int ARCEUUS_SPELLBOOK = 3;
     private static final int[] RUNE_POUCH_RUNE_VARBITS = {
         VarbitID.RUNE_POUCH_TYPE_1,
@@ -576,6 +581,23 @@ public class BookOfTheDeadNotifierPlugin extends Plugin
     public boolean shouldShowWarning()
     {
         return warningShown;
+    }
+
+    // The config panel cannot host real buttons, so "Buy me a coffee" is a checkbox that
+    // opens the Ko-fi page when ticked and immediately unticks itself.
+    @Subscribe
+    public void onSupportButtonPressed(ConfigChanged event)
+    {
+        boolean isSupportButtonTick = "bookofthedeadreminder".equals(event.getGroup())
+            && "supportButton".equals(event.getKey())
+            && Boolean.parseBoolean(event.getNewValue());
+        if (!isSupportButtonTick)
+        {
+            return;
+        }
+
+        LinkBrowser.browse("https://ko-fi.com/jakevollkommer");
+        configManager.setConfiguration("bookofthedeadreminder", "supportButton", false);
     }
 
     @Provides
