@@ -27,9 +27,6 @@ import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.HotkeyListener;
 
 import javax.inject.Inject;
-import net.runelite.client.ui.ClientToolbar;
-import net.runelite.client.ui.NavigationButton;
-import net.runelite.client.util.ImageUtil;
 
 @Slf4j
 @PluginDescriptor(
@@ -39,11 +36,6 @@ import net.runelite.client.util.ImageUtil;
 )
 public class BookOfTheDeadNotifierPlugin extends Plugin
 {
-    @Inject
-    private ClientToolbar clientToolbar;
-
-    private NavigationButton navigationButton;
-
     private static final int ARCEUUS_SPELLBOOK = 3;
     private static final int[] RUNE_POUCH_RUNE_VARBITS = {
         VarbitID.RUNE_POUCH_TYPE_1,
@@ -106,14 +98,6 @@ public class BookOfTheDeadNotifierPlugin extends Plugin
     {
         overlayManager.add(overlay);
         keyManager.registerKeyListener(hotkeyListener);
-
-        navigationButton = NavigationButton.builder()
-            .tooltip("Book of the Dead Reminder")
-            .icon(ImageUtil.loadImageResource(BookOfTheDeadNotifierPlugin.class, "panel_icon.png"))
-            .priority(9)
-            .panel(new BookOfTheDeadNotifierPanel())
-            .build();
-        clientToolbar.addNavigation(navigationButton);
         clientThread.invokeLater(this::refreshPlayerState);
         log.info("Book of the Dead Reminder started!");
     }
@@ -123,7 +107,6 @@ public class BookOfTheDeadNotifierPlugin extends Plugin
     {
         overlayManager.remove(overlay);
         keyManager.unregisterKeyListener(hotkeyListener);
-        clientToolbar.removeNavigation(navigationButton);
         log.info("Book of the Dead Reminder stopped!");
     }
 
