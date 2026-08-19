@@ -19,6 +19,7 @@ import net.runelite.client.callback.ClientThread;
 import net.runelite.client.Notifier;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
+import net.runelite.client.game.ItemManager;
 import net.runelite.client.input.KeyManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
@@ -73,6 +74,9 @@ public class BookOfTheDeadNotifierPlugin extends Plugin
 
     @Inject
     private ClientThread clientThread;
+
+    @Inject
+    private ItemManager itemManager;
 
     private boolean hasArceuusSpellbook = false;
     private boolean hasSufficientThrallRunes = false;
@@ -437,7 +441,7 @@ public class BookOfTheDeadNotifierPlugin extends Plugin
             return false;
         }
 
-        return isFireStaff(item.getId());
+        return isFireStaff(canonicalizeItemId(item.getId()));
     }
 
     private Item getEquippedItem(EquipmentInventorySlot slot)
@@ -523,12 +527,17 @@ public class BookOfTheDeadNotifierPlugin extends Plugin
     {
         for (Item item : container.getItems())
         {
-            if (item.getId() == itemId)
+            if (canonicalizeItemId(item.getId()) == itemId)
             {
                 return true;
             }
         }
         return false;
+    }
+
+    private int canonicalizeItemId(int itemId)
+    {
+        return itemManager.canonicalize(itemId);
     }
 
     private void showWarning()
