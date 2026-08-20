@@ -583,7 +583,7 @@ public class BookOfTheDeadNotifierPlugin extends Plugin
     // The config panel cannot host real buttons, so the Feedback "buttons" are checkboxes
     // that act as buttons: any click of the box, tick or untick, opens the link.
     @Subscribe
-    public void onFeedbackButtonPressed(ConfigChanged event)
+    public void onConfigChanged(ConfigChanged event)
     {
         if (!"bookofthedeadreminder".equals(event.getGroup()) || event.getNewValue() == null)
         {
