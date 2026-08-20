@@ -4,9 +4,11 @@ import net.runelite.client.config.*;
 
 import java.awt.*;
 
-@ConfigGroup("bookofthedeadreminder")
+@ConfigGroup(BookOfTheDeadNotifierConfig.GROUP)
 public interface BookOfTheDeadNotifierConfig extends Config
 {
+	String GROUP = "bookofthedeadreminder";
+
     @ConfigItem(
         keyName = "reminderStyle",
         name = "Reminder Text",
@@ -85,45 +87,34 @@ public interface BookOfTheDeadNotifierConfig extends Config
     }
 
     @ConfigSection(
-        name = "Rune Thresholds",
-        description = "Minimum rune quantities required",
+        name = "Thrall Spell",
+        description = "Which thrall you cast and when to warn about runes",
         position = 4,
         closedByDefault = true
     )
-    String runeThresholdSection = "runeThresholds";
+    String thrallSpellSection = "thrallSpell";
 
     @ConfigItem(
-        keyName = "minFireRunes",
-        name = "Minimum Fire Runes",
-        description = "Minimum fire runes needed",
+        keyName = "thrallTier",
+        name = "Thrall Tier",
+        description = "The thrall you cast; Auto uses the highest your Magic level allows",
         position = 0,
-        section = runeThresholdSection
+        section = thrallSpellSection
     )
-    default int minFireRunes()
+    default ThrallTierSetting thrallTier()
     {
-        return 10;
+        return ThrallTierSetting.AUTO;
     }
 
+    @Range(min = 1, max = 1000)
     @ConfigItem(
-        keyName = "minBloodRunes",
-        name = "Minimum Blood Runes",
-        description = "Minimum blood runes needed",
+        keyName = "minCasts",
+        name = "Minimum Casts",
+        description = "Warn when you can cast fewer thralls than this",
         position = 1,
-        section = runeThresholdSection
+        section = thrallSpellSection
     )
-    default int minBloodRunes()
-    {
-        return 5;
-    }
-
-    @ConfigItem(
-        keyName = "minCosmicRunes",
-        name = "Minimum Cosmic Runes",
-        description = "Minimum cosmic runes needed",
-        position = 2,
-        section = runeThresholdSection
-    )
-    default int minCosmicRunes()
+    default int minCasts()
     {
         return 1;
     }

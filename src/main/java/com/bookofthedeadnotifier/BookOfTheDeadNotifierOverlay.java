@@ -118,16 +118,14 @@ public class BookOfTheDeadNotifierOverlay extends OverlayPanel
             return config.customText();
         }
 
-        MissingCondition condition = plugin.getCurrentMissingCondition();
-        
         if (style == BookOfTheDeadNotifierStyle.LONG_TEXT)
         {
-            return condition.getLongText();
+            return plugin.getReminderLongText();
         }
-        
+
         if (style == BookOfTheDeadNotifierStyle.SHORT_TEXT)
         {
-            return condition.getShortText();
+            return plugin.getReminderShortText();
         }
         
         return null;
